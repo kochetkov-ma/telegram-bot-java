@@ -1,0 +1,36 @@
+plugins {
+    id 'java'
+    id 'com.bmuschko.docker-java-application' version '8.0.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.telegram:telegrambots:6.1.0'
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest { attributes "Main-Class": "ru.brewcode.bot.Main" }
+    from { configurations.runtimeClasspath.collect { it.directory ? it : zipTree(it) } }
+}
+
+// heroku login
+// heroku container:release -a=test-java-telegram bot-poll
+// Create 'docker image' for heroku
+// https://devcenter.heroku.com/articles/container-registry-and-runtime
+docker {
+    dockerBuildImage.dependsOn jar
+    registryCredentials {
+        url = 'https://registry.heroku.com/v2/'
+        username = '_'
+        password = property("heroku.token")
+    }
+    javaApplication {
+        baseImage = 'openjdk:11.0.16-jre-slim-buster'
+        images = ['registry.heroku.com/test-java-telegram/bot-poll:latest']
+    }
+}
+
