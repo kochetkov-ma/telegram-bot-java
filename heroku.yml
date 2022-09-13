@@ -1,3 +1,4 @@
 build:
   docker:
     bot-poll: Dockerfile
+    worker: build/docker/Dockerfile
